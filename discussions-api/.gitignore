@@ -1,0 +1,9 @@
+# IDE
+.vscode/
+.idea/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
+# Ignore dynaconf secret files
+.secrets.*
