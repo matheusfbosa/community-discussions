@@ -3,18 +3,20 @@
 from typing import Optional
 import uuid
 from datetime import datetime
+
 from pydantic import BaseModel, Field
 
 
 class Topic(BaseModel):
     """Topic model."""
 
-    updated: Optional[datetime]
     topic_id: str = Field(default_factory=uuid.uuid4, alias="_id")
     title: str = Field(...)
     content: str = Field(...)
-    created: datetime = Field(default_factory=datetime.now)
+    username: str = Field(...)
     discussion_type: str = Field(default="topic", alias="type")
+    created: datetime = Field(default_factory=datetime.now)
+    updated: Optional[datetime] = Field(default=None, alias="updated")
 
     class Config:
         """Topic model configuration."""
@@ -24,6 +26,7 @@ class Topic(BaseModel):
             "example": {
                 "title": "Hey!",
                 "content": "Can you help me please?",
+                "username": "John Doe",
             }
         }
 

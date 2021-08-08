@@ -1,6 +1,6 @@
 """Repository module."""
 import abc
-from typing import Any, Optional
+from typing import Any, Dict, List, Optional
 
 
 class Repository:
@@ -9,8 +9,15 @@ class Repository:
     COLLECTION_NAME = "discussions"
 
     @abc.abstractmethod
-    async def find_all(self) -> Any:
-        """Find all entities."""
+    async def find(self, skip: int, limit: int) -> List[Any]:
+        """Find entities."""
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    async def search(
+        self, query: List[Dict[str, Any]], term: str, skip: int, limit: int
+    ) -> List[Any]:
+        """Search for entities."""
         raise NotImplementedError()
 
     @abc.abstractmethod
