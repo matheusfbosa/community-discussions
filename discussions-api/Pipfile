@@ -5,13 +5,14 @@ name = "pypi"
 
 [packages]
 fastapi = "*"
-pydantic = "*"
 uvicorn = {extras = ["standard"], version = "*"}
+pydantic = "*"
 motor = "*"
 dnspython = "*"
 dynaconf = "*"
 
 [dev-packages]
+pylint = "*"
 
 [requires]
 python_version = "3.8"
