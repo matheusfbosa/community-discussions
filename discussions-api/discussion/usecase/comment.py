@@ -2,16 +2,16 @@
 
 from typing import List, Optional
 
-from discussion.repository.topic import TopicRepository
-from discussion.repository.comment import CommentRepository
-from discussion.model.comment import Comment, UpdateComment
+from discussion.repository.topic import TopicRepositoryMongo
+from discussion.repository.comment import CommentRepositoryMongo
+from discussion.domain.comment import Comment, UpdateComment
 
 
 class CommentUsecase:
     """Comments usecase."""
 
     def __init__(
-        self, topic_repo: TopicRepository, comment_repo: CommentRepository
+        self, topic_repo: TopicRepositoryMongo, comment_repo: CommentRepositoryMongo
     ) -> None:
         self.topic_repo = topic_repo
         self.comment_repo = comment_repo
@@ -19,6 +19,15 @@ class CommentUsecase:
     async def find(self, skip: int, limit: int) -> List[Comment]:
         """Find all comments."""
         comments: List[Comment] = await self.comment_repo.find(skip, limit)
+        return comments
+
+    async def find_by_topic(
+        self, topic_id: str, skip: int, limit: int
+    ) -> List[Comment]:
+        """Find all comments by topic."""
+        comments: List[Comment] = await self.comment_repo.find_by_topic(
+            topic_id, skip, limit
+        )
         return comments
 
     async def get(self, comment_id: str) -> Optional[Comment]:

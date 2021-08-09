@@ -2,17 +2,17 @@
 
 from typing import List, Optional, Tuple
 
-from discussion.repository.topic import TopicRepository
-from discussion.repository.comment import CommentRepository
-from discussion.model.topic import Topic, UpdateTopic
-from discussion.model.comment import Comment
+from discussion.domain.comment import Comment
+from discussion.domain.topic import Topic, UpdateTopic
+from discussion.repository.topic import TopicRepositoryMongo
+from discussion.repository.comment import CommentRepositoryMongo
 
 
 class TopicUsecase:
     """Topics usecase."""
 
     def __init__(
-        self, topic_repo: TopicRepository, comment_repo: CommentRepository
+        self, topic_repo: TopicRepositoryMongo, comment_repo: CommentRepositoryMongo
     ) -> None:
         self.topic_repo = topic_repo
         self.comment_repo = comment_repo
@@ -36,8 +36,8 @@ class TopicUsecase:
 
     async def __get_comments_by_topic(self, topic_id: str) -> Tuple[List[Comment], int]:
         """Get comments by topic."""
-        comments: List[Comment] = await self.comment_repo.search(
-            query=[{"topic": topic_id}], limit=100
+        comments: List[Comment] = await self.comment_repo.find_by_topic(
+            topic_id=topic_id, limit=100
         )
         return comments, len(comments)
 

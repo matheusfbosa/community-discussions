@@ -6,7 +6,7 @@ from fastapi import APIRouter, Body, Request, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 
-from discussion.model.topic import Topic, UpdateTopic
+from discussion.domain.topic import Topic, UpdateTopic
 
 router = APIRouter()
 
@@ -26,7 +26,7 @@ async def search_topics(request: Request, term: str, skip: int = 0, limit: int =
 
 
 @router.get("/{topic_id}", response_description="Get a single topic")
-async def get_topic(topic_id: str, request: Request):
+async def get_topic(request: Request, topic_id: str):
     """Get a single topic."""
     if (topic := await request.app.topic_usecase.get(topic_id)) is not None:
         return topic
@@ -42,7 +42,7 @@ async def create_topic(request: Request, topic: Topic = Body(...)):
 
 
 @router.put("/{topic_id}", response_description="Update an existing topic")
-async def update_topic(topic_id: str, request: Request, topic: UpdateTopic = Body(...)):
+async def update_topic(request: Request, topic_id: str, topic: UpdateTopic = Body(...)):
     """Update an existing topic."""
     try:
         if (
@@ -57,7 +57,7 @@ async def update_topic(topic_id: str, request: Request, topic: UpdateTopic = Bod
 
 
 @router.delete("/{topic_id}", response_description="Delete a topic")
-async def delete_topic(topic_id: str, request: Request):
+async def delete_topic(request: Request, topic_id: str):
     """Delete a topic."""
     try:
         deleted: bool = await request.app.topic_usecase.delete(topic_id)
