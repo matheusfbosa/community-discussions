@@ -36,8 +36,7 @@ async def get_topic(request: Request, topic_id: str):
 @router.post("", response_description="Create a new topic")
 async def create_topic(request: Request, topic: Topic = Body(...)):
     """Create a new topic."""
-    new_topic = jsonable_encoder(topic)
-    created_topic = await request.app.topic_usecase.create(new_topic)
+    created_topic = await request.app.topic_usecase.create(topic)
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_topic)
 
 
@@ -49,9 +48,9 @@ async def update_topic(request: Request, topic_id: str, topic: UpdateTopic = Bod
             updated_topic := await request.app.topic_usecase.update(topic_id, topic)
         ) is not None:
             return updated_topic
-    except RuntimeError as e:
+    except RuntimeError as err:
         return JSONResponse(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, content=str(e)
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, content=str(err)
         )
     raise HTTPException(status_code=404, detail=f"topic {topic_id} not found")
 
@@ -61,9 +60,9 @@ async def delete_topic(request: Request, topic_id: str):
     """Delete a topic."""
     try:
         deleted: bool = await request.app.topic_usecase.delete(topic_id)
-    except RuntimeError as e:
+    except RuntimeError as err:
         return JSONResponse(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, content=str(e)
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, content=str(err)
         )
     if deleted:
         return JSONResponse(status_code=status.HTTP_204_NO_CONTENT)

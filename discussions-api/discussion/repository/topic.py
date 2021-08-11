@@ -14,9 +14,7 @@ class TopicRepositoryMongo(TopicRepository):
     DISCUSSION_TYPE = "topic"
 
     def __init__(self, mongodb_client: AsyncIOMotorClient) -> None:
-        self.mongodb: AsyncIOMotorDatabase = mongodb_client[
-            TopicRepositoryMongo.COLLECTION_NAME
-        ]
+        self.mongodb = mongodb_client[TopicRepositoryMongo.COLLECTION_NAME]
 
     async def find(self, skip: int, limit: int) -> List[Topic]:
         """Find topics."""
@@ -54,7 +52,7 @@ class TopicRepositoryMongo(TopicRepository):
         return topics
 
     async def get(self, topic_id: str) -> Optional[Topic]:
-        """Get a topic by id."""
+        """Get a topic."""
         if (
             topic := await self.mongodb.find_one(
                 {"_id": topic_id, "type": TopicRepositoryMongo.DISCUSSION_TYPE}
@@ -62,12 +60,12 @@ class TopicRepositoryMongo(TopicRepository):
         ) is not None:
             return topic
 
-    async def create(self, topic: Topic) -> Any:
+    async def create(self, topic: Dict[str, Any]) -> str:
         """Create a topic."""
-        created_topic = await self.mongodb.insert_one(topic)
-        return created_topic
+        result = await self.mongodb.insert_one(topic)
+        return result.inserted_id
 
-    async def update(self, topic_id: str, topic: Dict[str, Any]) -> Any:
+    async def update(self, topic_id: str, topic: Dict[str, Any]) -> int:
         """Update a topic."""
         result = await self.mongodb.update_one({"_id": topic_id}, {"$set": topic})
         return result.modified_count

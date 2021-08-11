@@ -41,12 +41,14 @@ def create_app() -> None:
     app.comment_usecase = CommentUsecase(topic_repo, comment_repo)
     # Routers
     app.include_router(topic_router, tags=["Topics"], prefix="/topics")
-    app.include_router(comment_router, tags=["Comments"], prefix="")
+    app.include_router(
+        comment_router, tags=["Comments"], prefix="/topics/{topic_id}/comments"
+    )
 
 
 if __name__ == "__main__":
     uvicorn.run(
-        "app:app",
+        "main:app",
         host=settings.host,
         reload=settings.debug_mode,
         port=settings.port,
