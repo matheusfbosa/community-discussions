@@ -6,6 +6,7 @@ from fastapi import APIRouter, Body, Request, HTTPException, status
 from fastapi.responses import JSONResponse
 
 from discussion.domain.comment import Comment, UpdateComment
+from discussion.usecase.comment import CommentNotFoundToBeReplied, TopicNotFound
 
 router = APIRouter()
 
@@ -26,15 +27,17 @@ async def get_comment(request: Request, topic_id: str, comment_id: str):
     """Get a single comment in a topic."""
     try:
         comment = await request.app.comment_usecase.get(topic_id, comment_id)
-    except RuntimeError as err:
+    except TopicNotFound as err:
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, content=str(err)
         )
-    if comment is not None:
-        return comment
-    raise HTTPException(
-        status_code=404, detail=f"comment {comment_id} not found in topic {topic_id}"
-    )
+    else:
+        if comment is not None:
+            return comment
+        raise HTTPException(
+            status_code=404,
+            detail=f"comment {comment_id} not found in topic {topic_id}",
+        )
 
 
 @router.post("", response_description="Create a new comment in a topic")
@@ -42,11 +45,14 @@ async def create_comment(request: Request, topic_id: str, comment: Comment = Bod
     """Create a new comment in a topic."""
     try:
         created_comment = await request.app.comment_usecase.create(topic_id, comment)
-    except RuntimeError as err:
+    except (TopicNotFound, CommentNotFoundToBeReplied) as err:
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, content=str(err)
         )
-    return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_comment)
+    else:
+        return JSONResponse(
+            status_code=status.HTTP_201_CREATED, content=created_comment
+        )
 
 
 @router.put(
@@ -60,15 +66,17 @@ async def update_comment(
         updated_topic = await request.app.comment_usecase.update(
             topic_id, comment_id, comment
         )
-    except RuntimeError as err:
+    except TopicNotFound as err:
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, content=str(err)
         )
-    if updated_topic is not None:
-        return updated_topic
-    raise HTTPException(
-        status_code=404, detail=f"comment {comment_id} not found in topic {topic_id}"
-    )
+    else:
+        if updated_topic is not None:
+            return updated_topic
+        raise HTTPException(
+            status_code=404,
+            detail=f"comment {comment_id} not found in topic {topic_id}",
+        )
 
 
 @router.delete("/{comment_id}", response_description="Delete a comment in a topic")
@@ -76,12 +84,14 @@ async def delete_comment(request: Request, topic_id: str, comment_id: str):
     """Delete a comment in a topic."""
     try:
         deleted: bool = await request.app.comment_usecase.delete(topic_id, comment_id)
-    except RuntimeError as err:
+    except TopicNotFound as err:
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, content=str(err)
         )
-    if deleted:
-        return JSONResponse(status_code=status.HTTP_204_NO_CONTENT)
-    raise HTTPException(
-        status_code=404, detail=f"comment {comment_id} not found in topic {topic_id}"
-    )
+    else:
+        if deleted:
+            return JSONResponse(status_code=status.HTTP_204_NO_CONTENT)
+        raise HTTPException(
+            status_code=404,
+            detail=f"comment {comment_id} not found in topic {topic_id}",
+        )

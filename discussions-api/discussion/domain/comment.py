@@ -20,7 +20,7 @@ class Comment(BaseModel):
     reply_comment: str = Field(default=None, alias="reply")
 
     class Config:
-        """Comment model configuration."""
+        """Pydantic config class."""
 
         allow_population_by_field_name = True
         schema_extra = {
@@ -39,7 +39,7 @@ class UpdateComment(BaseModel):
     updated: Optional[datetime] = Field(default_factory=datetime.now)
 
     class Config:
-        """Comment model for update configuration."""
+        """Pydantic config class."""
 
         allow_population_by_field_name = True
         schema_extra = {

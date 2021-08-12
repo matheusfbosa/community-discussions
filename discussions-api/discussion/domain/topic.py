@@ -19,7 +19,7 @@ class Topic(BaseModel):
     updated: Optional[datetime] = Field(default=None, alias="updated")
 
     class Config:
-        """Topic model configuration."""
+        """Pydantic config class."""
 
         allow_population_by_field_name = True
         schema_extra = {
@@ -39,7 +39,7 @@ class UpdateTopic(BaseModel):
     updated: Optional[datetime] = Field(default_factory=datetime.now)
 
     class Config:
-        """Topic model for update configuration."""
+        """Pydantic config class."""
 
         schema_extra = {
             "example": {

@@ -9,6 +9,24 @@ from discussion.repository.comment import CommentRepositoryMongo
 from discussion.domain.comment import Comment, UpdateComment
 
 
+class CommentNotFoundToBeReplied(Exception):
+    """Custom error that is raised when a comment does not exist to be replied."""
+
+    def __init__(self, comment: str, message: str) -> None:
+        self.comment = comment
+        self.message = message
+        super().__init__(message)
+
+
+class TopicNotFound(Exception):
+    """Custom error that is raised when a topic does not exist."""
+
+    def __init__(self, topic: str, message: str) -> None:
+        self.topic = topic
+        self.message = message
+        super().__init__(message)
+
+
 class CommentUsecase:
     """Comments usecase."""
 
@@ -31,7 +49,7 @@ class CommentUsecase:
         """Get a single comment in a topic."""
         topic_exists = await self.__check_topic_exists(topic_id)
         if not topic_exists:
-            raise RuntimeError(f"topic {topic_id} does not exist")
+            raise TopicNotFound(topic=topic_id, message="topic not found")
 
         comment = await self.comment_repo.get(topic_id, comment_id)
         return comment
@@ -40,14 +58,15 @@ class CommentUsecase:
         """Create a comment in a topic."""
         topic_exists = await self.__check_topic_exists(topic_id)
         if not topic_exists:
-            raise RuntimeError(f"topic {topic_id} does not exist")
+            raise TopicNotFound(topic=topic_id, message="topic not found")
 
         reply_comment_id = comment.reply_comment
         if reply_comment_id:
             reply_comment = await self.comment_repo.get(topic_id, reply_comment_id)
             if not reply_comment:
-                raise RuntimeError(
-                    f"comment {reply_comment_id} does not exist to reply"
+                raise CommentNotFoundToBeReplied(
+                    comment=reply_comment_id,
+                    message="comment does not exist to be replied",
                 )
 
         comment.topic_id = topic_id
@@ -61,7 +80,7 @@ class CommentUsecase:
         """Update a comment in a topic."""
         topic_exists = await self.__check_topic_exists(topic_id)
         if not topic_exists:
-            raise RuntimeError(f"topic {topic_id} does not exist")
+            raise TopicNotFound(topic=topic_id, message="topic not found")
 
         # Cleaning up the request body
         comment_clean = {k: v for k, v in comment.dict().items() if v is not None}
@@ -84,7 +103,7 @@ class CommentUsecase:
         """Delete a comment in a topic."""
         topic_exists = await self.__check_topic_exists(topic_id)
         if not topic_exists:
-            raise RuntimeError(f"topic {topic_id} does not exist")
+            raise TopicNotFound(topic=topic_id, message="topic not found")
 
         deleted_count: int = await self.comment_repo.delete(topic_id, comment_id)
         return deleted_count > 0

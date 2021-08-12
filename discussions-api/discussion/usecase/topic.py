@@ -10,6 +10,16 @@ from discussion.domain.comment import Comment
 from discussion.domain.topic import Topic, UpdateTopic
 
 
+class TopicCanNotBeChanged(Exception):
+    """Custom error that is raised when a topic can not be changed."""
+
+    def __init__(self, topic: str, comments_count: int, message: str) -> None:
+        self.topic = topic
+        self.comments_count = comments_count
+        self.message = message
+        super().__init__(message)
+
+
 class TopicUsecase:
     """Topics usecase."""
 
@@ -51,8 +61,10 @@ class TopicUsecase:
             # Check if the topic is not referenced by any comment
             _, comments_count = await self.__get_comments_by_topic(topic_id)
             if comments_count > 0:
-                raise RuntimeError(
-                    f"can not update topic {topic_id} referenced by {comments_count} comments"
+                raise TopicCanNotBeChanged(
+                    topic=topic_id,
+                    comments_count=comments_count,
+                    message="can not update topic referenced by one or more comments",
                 )
             modified_count = await self.topic_repo.update(topic_id, topic_clean)
             if modified_count == 1:
@@ -67,8 +79,10 @@ class TopicUsecase:
         # Check if the topic is not referenced by any comment
         _, comments_count = await self.__get_comments_by_topic(topic_id)
         if comments_count > 0:
-            raise RuntimeError(
-                f"can not delete topic {topic_id} referenced by {comments_count} comments"
+            raise TopicCanNotBeChanged(
+                topic=topic_id,
+                comments_count=comments_count,
+                message="can not delete topic referenced by one or more comments",
             )
         deleted_count: int = await self.topic_repo.delete(topic_id)
         return deleted_count > 0

@@ -4,9 +4,9 @@ from typing import List
 
 from fastapi import APIRouter, Body, Request, HTTPException, status
 from fastapi.responses import JSONResponse
-from fastapi.encoders import jsonable_encoder
 
 from discussion.domain.topic import Topic, UpdateTopic
+from discussion.usecase.topic import TopicCanNotBeChanged
 
 router = APIRouter()
 
@@ -48,11 +48,12 @@ async def update_topic(request: Request, topic_id: str, topic: UpdateTopic = Bod
             updated_topic := await request.app.topic_usecase.update(topic_id, topic)
         ) is not None:
             return updated_topic
-    except RuntimeError as err:
+    except TopicCanNotBeChanged as err:
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, content=str(err)
         )
-    raise HTTPException(status_code=404, detail=f"topic {topic_id} not found")
+    else:
+        raise HTTPException(status_code=404, detail=f"topic {topic_id} not found")
 
 
 @router.delete("/{topic_id}", response_description="Delete a topic")
@@ -60,10 +61,11 @@ async def delete_topic(request: Request, topic_id: str):
     """Delete a topic."""
     try:
         deleted: bool = await request.app.topic_usecase.delete(topic_id)
-    except RuntimeError as err:
+    except TopicCanNotBeChanged as err:
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, content=str(err)
         )
-    if deleted:
-        return JSONResponse(status_code=status.HTTP_204_NO_CONTENT)
-    raise HTTPException(status_code=404, detail=f"topic {topic_id} not found")
+    else:
+        if deleted:
+            return JSONResponse(status_code=status.HTTP_204_NO_CONTENT)
+        raise HTTPException(status_code=404, detail=f"topic {topic_id} not found")
