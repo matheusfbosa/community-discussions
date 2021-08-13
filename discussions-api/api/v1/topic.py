@@ -1,4 +1,4 @@
-"""Router module."""
+"""Topic router module."""
 
 from typing import List
 

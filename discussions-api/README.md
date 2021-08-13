@@ -34,7 +34,7 @@ Visit [localhost:8000/docs](http://localhost:8000/docs) in your browser and you 
 
 ```shell
 curl -X 'GET' \
-  'http://localhost:8000/topics/search?skip=0&limit=10&term=Life' \
+  'http://localhost:8000/v1/api/topics/search?skip=0&limit=10&term=Life' \
   -H 'accept: application/json'
 ```
 
@@ -42,7 +42,7 @@ curl -X 'GET' \
 
 ```shell
 curl -X 'GET' \
-  'http://localhost:8000/comments?skip=0&limit=20' \
+  'http://localhost:8000/v1/api/topics/{topic_id}/comments?skip=0&limit=20' \
   -H 'accept: application/json'
 ```
 
