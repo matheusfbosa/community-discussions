@@ -6,42 +6,28 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 from config import settings
 
-from discussion.repository.topic import TopicRepository
-from discussion.repository.comment import CommentRepository
+from api.v1 import comment, topic
 from discussion.usecase.topic import TopicUsecase
 from discussion.usecase.comment import CommentUsecase
-from discussion.router.topic import router as topic_router
-from discussion.router.comment import router as comment_router
-
-app = FastAPI()
+from discussion.repository.topic import TopicRepositoryMongo
+from discussion.repository.comment import CommentRepositoryMongo
 
 
-@app.on_event("startup")
-async def startup() -> None:
-    """Starts up the app."""
-    create_app()
+app = FastAPI(title=settings.app_name)
+app.include_router(topic.router, tags=["Topics"], prefix="/v1/api/topics")
+app.include_router(
+    comment.router, tags=["Comments"], prefix="/v1/api/topics/{topic_id}/comments"
+)
 
-
-@app.on_event("shutdown")
-async def shutdown() -> None:
-    """Shuts down the app."""
-    app.mongodb_client.close()
-
-
-def create_app() -> None:
-    """Creates the app."""
-    # Database
-    app.mongodb_client = AsyncIOMotorClient(settings.db_url)
-    app.mongodb = app.mongodb_client[settings.db_name]
-    # Repositories
-    topic_repo = TopicRepository(app.mongodb)
-    comment_repo = CommentRepository(app.mongodb)
-    # Usecases
-    app.topic_usecase = TopicUsecase(topic_repo, comment_repo)
-    app.comment_usecase = CommentUsecase(topic_repo, comment_repo)
-    # Routers
-    app.include_router(topic_router, tags=["Topics"], prefix="/topics")
-    app.include_router(comment_router, tags=["Comments"], prefix="/comments")
+# Database
+app.mongodb_client = AsyncIOMotorClient(settings.db_url)
+app.mongodb = app.mongodb_client[settings.db_name]
+# Repositories
+topic_repo = TopicRepositoryMongo(app.mongodb)
+comment_repo = CommentRepositoryMongo(app.mongodb)
+# Usecases
+app.topic_usecase = TopicUsecase(topic_repo, comment_repo)
+app.comment_usecase = CommentUsecase(topic_repo, comment_repo)
 
 
 if __name__ == "__main__":
