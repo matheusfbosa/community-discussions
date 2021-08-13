@@ -2,10 +2,10 @@
 
 from typing import Any, Dict, List, Optional
 
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
+from motor.motor_asyncio import AsyncIOMotorClient
 
-from discussion.domain.topic import Topic
-from discussion.repository.base import TopicRepository
+from app.discussion.domain.topic import Topic
+from app.discussion.repository.base import TopicRepository
 
 
 class TopicRepositoryMongo(TopicRepository):
@@ -37,8 +37,7 @@ class TopicRepositoryMongo(TopicRepository):
         if term:
             query.append({"$text": {"$search": term}})
             cursor = self.mongodb.find(
-                {"$and": query},
-                {"score": {"$meta": "textScore"}},
+                {"$and": query}, {"score": {"$meta": "textScore"}},
             )
             # Sorting results in ascending order by text score
             cursor.sort([("score", {"$meta": "textScore"})])
@@ -53,12 +52,10 @@ class TopicRepositoryMongo(TopicRepository):
 
     async def get(self, topic_id: str) -> Optional[Topic]:
         """Get a topic."""
-        if (
-            topic := await self.mongodb.find_one(
-                {"_id": topic_id, "type": TopicRepositoryMongo.DISCUSSION_TYPE}
-            )
-        ) is not None:
-            return topic
+        topic = await self.mongodb.find_one(
+            {"_id": topic_id, "type": TopicRepositoryMongo.DISCUSSION_TYPE}
+        )
+        return topic
 
     async def create(self, topic: Dict[str, Any]) -> str:
         """Create a topic."""

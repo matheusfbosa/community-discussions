@@ -1,8 +1,8 @@
 """Topic module."""
 
-from typing import Optional
 import uuid
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -42,8 +42,5 @@ class UpdateTopic(BaseModel):
         """Pydantic config class."""
 
         schema_extra = {
-            "example": {
-                "title": "Hey!",
-                "content": "Can you help me please?",
-            }
+            "example": {"title": "Hey!", "content": "Can you help me please?"}
         }

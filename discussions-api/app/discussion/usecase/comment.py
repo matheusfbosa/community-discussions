@@ -4,9 +4,9 @@ from typing import List, Optional
 
 from fastapi.encoders import jsonable_encoder
 
-from discussion.repository.topic import TopicRepositoryMongo
-from discussion.repository.comment import CommentRepositoryMongo
-from discussion.domain.comment import Comment, UpdateComment
+from app.discussion.domain.comment import Comment, UpdateComment
+from app.discussion.repository.comment import CommentRepositoryMongo
+from app.discussion.repository.topic import TopicRepositoryMongo
 
 
 class CommentNotFoundToBeReplied(Exception):
@@ -94,10 +94,8 @@ class CommentUsecase:
                 ) is not None:
                     return updated_comment
 
-        if (
-            existing_comment := await self.comment_repo.get(topic_id, comment_id)
-        ) is not None:
-            return existing_comment
+        existing_comment = await self.comment_repo.get(topic_id, comment_id)
+        return existing_comment
 
     async def delete(self, topic_id: str, comment_id: str) -> bool:
         """Delete a comment in a topic."""

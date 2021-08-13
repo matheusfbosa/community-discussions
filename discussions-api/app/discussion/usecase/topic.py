@@ -4,10 +4,10 @@ from typing import List, Optional, Tuple
 
 from fastapi.encoders import jsonable_encoder
 
-from discussion.repository.topic import TopicRepositoryMongo
-from discussion.repository.comment import CommentRepositoryMongo
-from discussion.domain.comment import Comment
-from discussion.domain.topic import Topic, UpdateTopic
+from app.discussion.domain.comment import Comment
+from app.discussion.domain.topic import Topic, UpdateTopic
+from app.discussion.repository.comment import CommentRepositoryMongo
+from app.discussion.repository.topic import TopicRepositoryMongo
 
 
 class TopicCanNotBeChanged(Exception):
@@ -71,8 +71,8 @@ class TopicUsecase:
                 if (updated_topic := await self.topic_repo.get(topic_id)) is not None:
                     return updated_topic
 
-        if (existing_topic := await self.topic_repo.get(topic_id)) is not None:
-            return existing_topic
+        existing_topic = await self.topic_repo.get(topic_id)
+        return existing_topic
 
     async def delete(self, topic_id: str) -> bool:
         """Delete a topic."""

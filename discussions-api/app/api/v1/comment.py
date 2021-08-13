@@ -2,11 +2,11 @@
 
 from typing import List
 
-from fastapi import APIRouter, Body, Request, HTTPException, status
+from fastapi import APIRouter, Body, HTTPException, Request, status
 from fastapi.responses import JSONResponse
 
-from discussion.domain.comment import Comment, UpdateComment
-from discussion.usecase.comment import CommentNotFoundToBeReplied, TopicNotFound
+from app.discussion.domain.comment import Comment, UpdateComment
+from app.discussion.usecase.comment import CommentNotFoundToBeReplied, TopicNotFound
 
 router = APIRouter()
 
@@ -14,7 +14,7 @@ router = APIRouter()
 @router.get("", response_description="List comments by topic")
 async def list_comments_by_topic(
     request: Request, topic_id: str, skip: int = 0, limit: int = 10
-):
+) -> List[Comment]:
     """List comments by topic."""
     comments: List[Comment] = await request.app.comment_usecase.find_by_topic(
         topic_id, skip, limit
@@ -23,7 +23,7 @@ async def list_comments_by_topic(
 
 
 @router.get("/{comment_id}", response_description="Get a single comment in a topic")
-async def get_comment(request: Request, topic_id: str, comment_id: str):
+async def get_comment(request: Request, topic_id: str, comment_id: str) -> JSONResponse:
     """Get a single comment in a topic."""
     try:
         comment = await request.app.comment_usecase.get(topic_id, comment_id)
@@ -41,7 +41,9 @@ async def get_comment(request: Request, topic_id: str, comment_id: str):
 
 
 @router.post("", response_description="Create a new comment in a topic")
-async def create_comment(request: Request, topic_id: str, comment: Comment = Body(...)):
+async def create_comment(
+    request: Request, topic_id: str, comment: Comment = Body(...)
+) -> JSONResponse:
     """Create a new comment in a topic."""
     try:
         created_comment = await request.app.comment_usecase.create(topic_id, comment)
@@ -60,7 +62,7 @@ async def create_comment(request: Request, topic_id: str, comment: Comment = Bod
 )
 async def update_comment(
     request: Request, topic_id: str, comment_id: str, comment: UpdateComment = Body(...)
-):
+) -> JSONResponse:
     """Update an existing comment in a topic."""
     try:
         updated_topic = await request.app.comment_usecase.update(
@@ -80,7 +82,9 @@ async def update_comment(
 
 
 @router.delete("/{comment_id}", response_description="Delete a comment in a topic")
-async def delete_comment(request: Request, topic_id: str, comment_id: str):
+async def delete_comment(
+    request: Request, topic_id: str, comment_id: str
+) -> JSONResponse:
     """Delete a comment in a topic."""
     try:
         deleted: bool = await request.app.comment_usecase.delete(topic_id, comment_id)
