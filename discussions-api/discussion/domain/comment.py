@@ -1,4 +1,4 @@
-"""Model module."""
+"""Comment module."""
 
 from typing import Optional
 import uuid
@@ -12,12 +12,12 @@ class Comment(BaseModel):
 
     comment_id: str = Field(default_factory=uuid.uuid4, alias="_id")
     topic_id: str = Field(default=None, alias="topic")
+    reply_comment: str = Field(default=None, alias="reply")
     content: str = Field(...)
     username: str = Field(...)
     discussion_type: str = Field(default="comment", alias="type")
     created: datetime = Field(default_factory=datetime.now)
-    updated: Optional[datetime] = Field(default=None, alias="updated")
-    reply_comment: str = Field(default=None, alias="reply")
+    updated: Optional[datetime] = Field(default=None)
 
     class Config:
         """Pydantic config class."""

@@ -1,4 +1,4 @@
-"""Model module."""
+"""Topic module."""
 
 from typing import Optional
 import uuid
@@ -16,7 +16,7 @@ class Topic(BaseModel):
     username: str = Field(...)
     discussion_type: str = Field(default="topic", alias="type")
     created: datetime = Field(default_factory=datetime.now)
-    updated: Optional[datetime] = Field(default=None, alias="updated")
+    updated: Optional[datetime] = Field(default=None)
 
     class Config:
         """Pydantic config class."""
