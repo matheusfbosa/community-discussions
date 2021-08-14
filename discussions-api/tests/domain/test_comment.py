@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime
 
-from discussion.domain.comment import Comment
+from app.domain.comment import Comment
 
 
 def test_comment_from_dict() -> None:

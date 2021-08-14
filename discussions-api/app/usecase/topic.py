@@ -1,13 +1,13 @@
-"""Usecase module."""
+"""Topic usecase module."""
 
 from typing import List, Optional, Tuple
 
 from fastapi.encoders import jsonable_encoder
 
-from app.discussion.domain.comment import Comment
-from app.discussion.domain.topic import Topic, UpdateTopic
-from app.discussion.repository.comment import CommentRepositoryMongo
-from app.discussion.repository.topic import TopicRepositoryMongo
+from app.domain.comment import Comment
+from app.domain.topic import Topic, UpdateTopic
+from app.repository.comment import CommentRepositoryMongo
+from app.repository.topic import TopicRepositoryMongo
 
 
 class TopicCanNotBeChanged(Exception):
@@ -24,7 +24,9 @@ class TopicUsecase:
     """Topics usecase."""
 
     def __init__(
-        self, topic_repo: TopicRepositoryMongo, comment_repo: CommentRepositoryMongo
+        self,
+        topic_repo: TopicRepositoryMongo,
+        comment_repo: CommentRepositoryMongo,
     ) -> None:
         self.topic_repo = topic_repo
         self.comment_repo = comment_repo
@@ -52,7 +54,9 @@ class TopicUsecase:
         created_topic = await self.topic_repo.get(inserted_id)
         return created_topic
 
-    async def update(self, topic_id: str, topic: UpdateTopic) -> Optional[Topic]:
+    async def update(
+        self, topic_id: str, topic: UpdateTopic
+    ) -> Optional[Topic]:
         """Update a topic."""
         # Cleaning up the request body
         topic_clean = {k: v for k, v in topic.dict().items() if v is not None}
@@ -64,11 +68,15 @@ class TopicUsecase:
                 raise TopicCanNotBeChanged(
                     topic=topic_id,
                     comments_count=comments_count,
-                    message="can not update topic referenced by one or more comments",
+                    message="can not update topic containing comments",
                 )
-            modified_count = await self.topic_repo.update(topic_id, topic_clean)
+            modified_count = await self.topic_repo.update(
+                topic_id, topic_clean
+            )
             if modified_count == 1:
-                if (updated_topic := await self.topic_repo.get(topic_id)) is not None:
+                if (
+                    updated_topic := await self.topic_repo.get(topic_id)
+                ) is not None:
                     return updated_topic
 
         existing_topic = await self.topic_repo.get(topic_id)
@@ -82,12 +90,14 @@ class TopicUsecase:
             raise TopicCanNotBeChanged(
                 topic=topic_id,
                 comments_count=comments_count,
-                message="can not delete topic referenced by one or more comments",
+                message="can not delete topic containing comments",
             )
         deleted_count: int = await self.topic_repo.delete(topic_id)
         return deleted_count > 0
 
-    async def __get_comments_by_topic(self, topic_id: str) -> Tuple[List[Comment], int]:
+    async def __get_comments_by_topic(
+        self, topic_id: str
+    ) -> Tuple[List[Comment], int]:
         """Get comments by topic."""
         comments: List[Comment] = await self.comment_repo.find_by_topic(
             topic_id=topic_id, limit=100

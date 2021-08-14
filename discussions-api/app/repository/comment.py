@@ -1,11 +1,11 @@
-"""Repository module."""
+"""Comment repository module."""
 
 from typing import Any, Dict, List, Optional
 
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from app.discussion.domain.comment import Comment
-from app.discussion.repository.base import CommentRepository
+from app.domain.comment import Comment
+from app.repository.base import CommentRepository
 
 
 class CommentRepositoryMongo(CommentRepository):
@@ -56,5 +56,7 @@ class CommentRepositoryMongo(CommentRepository):
 
     async def delete(self, topic_id: str, comment_id: str) -> int:
         """Delete a comment."""
-        result = await self.mongodb.delete_one({"_id": comment_id, "topic": topic_id})
+        result = await self.mongodb.delete_one(
+            {"_id": comment_id, "topic": topic_id}
+        )
         return result.deleted_count

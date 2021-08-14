@@ -1,4 +1,4 @@
-"""Topic module."""
+"""Topic domain module."""
 
 import uuid
 from datetime import datetime

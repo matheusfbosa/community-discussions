@@ -1,4 +1,4 @@
-"""Comment module."""
+"""Comment domain module."""
 
 import uuid
 from datetime import datetime

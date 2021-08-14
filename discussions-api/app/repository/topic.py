@@ -1,11 +1,11 @@
-"""Repository module."""
+"""Topic repository module."""
 
 from typing import Any, Dict, List, Optional
 
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from app.discussion.domain.topic import Topic
-from app.discussion.repository.base import TopicRepository
+from app.domain.topic import Topic
+from app.repository.base import TopicRepository
 
 
 class TopicRepositoryMongo(TopicRepository):
@@ -18,7 +18,9 @@ class TopicRepositoryMongo(TopicRepository):
 
     async def find(self, skip: int, limit: int) -> List[Topic]:
         """Find topics."""
-        cursor = self.mongodb.find({"type": TopicRepositoryMongo.DISCUSSION_TYPE})
+        cursor = self.mongodb.find(
+            {"type": TopicRepositoryMongo.DISCUSSION_TYPE}
+        )
         cursor.skip(skip).limit(limit)
         topics: List[Topic] = []
         async for doc in cursor:
@@ -64,7 +66,9 @@ class TopicRepositoryMongo(TopicRepository):
 
     async def update(self, topic_id: str, topic: Dict[str, Any]) -> int:
         """Update a topic."""
-        result = await self.mongodb.update_one({"_id": topic_id}, {"$set": topic})
+        result = await self.mongodb.update_one(
+            {"_id": topic_id}, {"$set": topic}
+        )
         return result.modified_count
 
     async def delete(self, topic_id: str) -> int:

@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime
 
-from discussion.domain.topic import Topic
+from app.domain.topic import Topic
 
 
 def test_topic_from_dict() -> None:

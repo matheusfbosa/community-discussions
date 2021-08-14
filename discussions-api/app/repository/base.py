@@ -1,10 +1,10 @@
-"""Repository module."""
+"""Base repository module."""
 
 import abc
 from typing import Any, Dict, List, Optional
 
-from app.discussion.domain.comment import Comment
-from app.discussion.domain.topic import Topic
+from app.domain.comment import Comment
+from app.domain.topic import Topic
 
 
 class TopicRepository:

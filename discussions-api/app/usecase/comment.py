@@ -1,16 +1,18 @@
-"""Usecase module."""
+"""Comment usecase module."""
 
 from typing import List, Optional
 
 from fastapi.encoders import jsonable_encoder
 
-from app.discussion.domain.comment import Comment, UpdateComment
-from app.discussion.repository.comment import CommentRepositoryMongo
-from app.discussion.repository.topic import TopicRepositoryMongo
+from app.domain.comment import Comment, UpdateComment
+from app.repository.comment import CommentRepositoryMongo
+from app.repository.topic import TopicRepositoryMongo
 
 
 class CommentNotFoundToBeReplied(Exception):
-    """Custom error that is raised when a comment does not exist to be replied."""
+    """
+    Custom error that is raised when a comment does not exist to be replied.
+    """
 
     def __init__(self, comment: str, message: str) -> None:
         self.comment = comment
@@ -31,7 +33,9 @@ class CommentUsecase:
     """Comments usecase."""
 
     def __init__(
-        self, topic_repo: TopicRepositoryMongo, comment_repo: CommentRepositoryMongo
+        self,
+        topic_repo: TopicRepositoryMongo,
+        comment_repo: CommentRepositoryMongo,
     ) -> None:
         self.topic_repo = topic_repo
         self.comment_repo = comment_repo
@@ -54,7 +58,9 @@ class CommentUsecase:
         comment = await self.comment_repo.get(topic_id, comment_id)
         return comment
 
-    async def create(self, topic_id: str, comment: Comment) -> Optional[Comment]:
+    async def create(
+        self, topic_id: str, comment: Comment
+    ) -> Optional[Comment]:
         """Create a comment in a topic."""
         topic_exists = await self.__check_topic_exists(topic_id)
         if not topic_exists:
@@ -62,7 +68,9 @@ class CommentUsecase:
 
         reply_comment_id = comment.reply_comment
         if reply_comment_id:
-            reply_comment = await self.comment_repo.get(topic_id, reply_comment_id)
+            reply_comment = await self.comment_repo.get(
+                topic_id, reply_comment_id
+            )
             if not reply_comment:
                 raise CommentNotFoundToBeReplied(
                     comment=reply_comment_id,
@@ -83,14 +91,18 @@ class CommentUsecase:
             raise TopicNotFound(topic=topic_id, message="topic not found")
 
         # Cleaning up the request body
-        comment_clean = {k: v for k, v in comment.dict().items() if v is not None}
+        comment_clean = {
+            k: v for k, v in comment.dict().items() if v is not None
+        }
         if len(comment_clean) >= 1:
             modified_count = await self.comment_repo.update(
                 topic_id, comment_id, comment_clean
             )
             if modified_count == 1:
                 if (
-                    updated_comment := await self.comment_repo.get(topic_id, comment_id)
+                    updated_comment := await self.comment_repo.get(
+                        topic_id, comment_id
+                    )
                 ) is not None:
                     return updated_comment
 
@@ -103,7 +115,9 @@ class CommentUsecase:
         if not topic_exists:
             raise TopicNotFound(topic=topic_id, message="topic not found")
 
-        deleted_count: int = await self.comment_repo.delete(topic_id, comment_id)
+        deleted_count: int = await self.comment_repo.delete(
+            topic_id, comment_id
+        )
         return deleted_count > 0
 
     async def __check_topic_exists(self, topic_id: str) -> bool:
