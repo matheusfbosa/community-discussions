@@ -7,18 +7,14 @@ help:             ## Show the help.
 	@echo "Targets:"
 	@fgrep "##" Makefile | fgrep -v fgrep
 
-.PHONY: gen-reqs
-gen-reqs: 		  ## Generate the requirements.txt file.
-	poetry export --dev --without-hashes -f requirements.txt --output requirements.txt
-
 .PHONY: install
 install:          ## Install the project in dev mode.
 	poetry install
-	# pip install -r requirements.txt
+	poetry shell
 
 .PHONY: run
 run:			  ## Run the project in dev mode.
-	python3 main.py
+	python3 run.py
 
 .PHONY: fmt
 fmt:              ## Format code using black & isort.

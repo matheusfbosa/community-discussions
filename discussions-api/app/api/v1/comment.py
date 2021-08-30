@@ -1,24 +1,30 @@
 """Comment router module."""
 
-from typing import List
+from typing import List, Union
 
-from fastapi import APIRouter, Body, HTTPException, Request, status
+from fastapi import APIRouter, Body, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 
+from app.api import deps
 from app.domain.comment import Comment, UpdateComment
-from app.usecase.comment import CommentNotFoundToBeReplied, TopicNotFound
+from app.usecase.comment import (
+    CommentNotFoundToBeReplied,
+    CommentUsecase,
+    TopicNotFound,
+)
 
 router = APIRouter()
 
 
 @router.get("", response_description="List comments by topic")
 async def list_comments_by_topic(
-    request: Request, topic_id: str, skip: int = 0, limit: int = 10
+    topic_id: str,
+    skip: int = 0,
+    limit: int = 10,
+    usecase: CommentUsecase = Depends(deps.get_comment_usecase),
 ) -> List[Comment]:
     """List comments by topic."""
-    comments = await request.app.comment_usecase.find_by_topic(
-        topic_id, skip, limit
-    )
+    comments = await usecase.find_by_topic(topic_id, skip, limit)
     return comments
 
 
@@ -26,11 +32,13 @@ async def list_comments_by_topic(
     "/{comment_id}", response_description="Get a single comment in a topic"
 )
 async def get_comment(
-    request: Request, topic_id: str, comment_id: str
-) -> JSONResponse:
+    topic_id: str,
+    comment_id: str,
+    usecase: CommentUsecase = Depends(deps.get_comment_usecase),
+) -> Union[Comment, JSONResponse]:
     """Get a single comment in a topic."""
     try:
-        comment = await request.app.comment_usecase.get(topic_id, comment_id)
+        comment = await usecase.get(topic_id, comment_id)
     except TopicNotFound as err:
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, content=str(err)
@@ -46,13 +54,13 @@ async def get_comment(
 
 @router.post("", response_description="Create a new comment in a topic")
 async def create_comment(
-    request: Request, topic_id: str, comment: Comment = Body(...)
+    topic_id: str,
+    comment: Comment = Body(...),
+    usecase: CommentUsecase = Depends(deps.get_comment_usecase),
 ) -> JSONResponse:
     """Create a new comment in a topic."""
     try:
-        created_comment = await request.app.comment_usecase.create(
-            topic_id, comment
-        )
+        created_comment = await usecase.create(topic_id, comment)
     except (TopicNotFound, CommentNotFoundToBeReplied) as err:
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, content=str(err)
@@ -68,23 +76,21 @@ async def create_comment(
     response_description="Update an existing comment in a topic",
 )
 async def update_comment(
-    request: Request,
     topic_id: str,
     comment_id: str,
     comment: UpdateComment = Body(...),
-) -> JSONResponse:
+    usecase: CommentUsecase = Depends(deps.get_comment_usecase),
+) -> Union[Comment, JSONResponse]:
     """Update an existing comment in a topic."""
     try:
-        updated_topic = await request.app.comment_usecase.update(
-            topic_id, comment_id, comment
-        )
+        updated_comment = await usecase.update(topic_id, comment_id, comment)
     except TopicNotFound as err:
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, content=str(err)
         )
     else:
-        if updated_topic is not None:
-            return updated_topic
+        if updated_comment is not None:
+            return updated_comment
         raise HTTPException(
             status_code=404,
             detail=f"comment {comment_id} not found in topic {topic_id}",
@@ -95,13 +101,13 @@ async def update_comment(
     "/{comment_id}", response_description="Delete a comment in a topic"
 )
 async def delete_comment(
-    request: Request, topic_id: str, comment_id: str
+    topic_id: str,
+    comment_id: str,
+    usecase: CommentUsecase = Depends(deps.get_comment_usecase),
 ) -> JSONResponse:
     """Delete a comment in a topic."""
     try:
-        deleted: bool = await request.app.comment_usecase.delete(
-            topic_id, comment_id
-        )
+        deleted: bool = await usecase.delete(topic_id, comment_id)
     except TopicNotFound as err:
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, content=str(err)
