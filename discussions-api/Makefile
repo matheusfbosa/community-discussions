@@ -28,7 +28,7 @@ lint:             ## Run pep8, black, mypy linters.
 	mypy app
 	black -l 79 --check app
 	isort --recursive --check-only app
-	flake8 --max-line-length=79
+	flake8 --max-line-length=79 app
 
 .PHONY: test
 test: lint		  ## Run tests and generate coverage report.
