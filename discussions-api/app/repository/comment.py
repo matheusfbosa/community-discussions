@@ -1,11 +1,11 @@
-"""Repository module."""
+"""Comment repository module."""
 
 from typing import Any, Dict, List, Optional
 
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from discussion.domain.comment import Comment
-from discussion.repository.base import CommentRepository
+from app.domain.comment import Comment
+from app.repository.base import CommentRepository
 
 
 class CommentRepositoryMongo(CommentRepository):
@@ -16,7 +16,9 @@ class CommentRepositoryMongo(CommentRepository):
     def __init__(self, mongodb_client: AsyncIOMotorClient) -> None:
         self.mongodb = mongodb_client[CommentRepositoryMongo.COLLECTION_NAME]
 
-    async def find_by_topic(self, topic_id: str, skip=0, limit=10) -> List[Comment]:
+    async def find_by_topic(
+        self, topic_id: str, skip: int = 0, limit: int = 10
+    ) -> List[Comment]:
         """Find comments by topic."""
         cursor = self.mongodb.find(
             {"topic": topic_id, "type": CommentRepositoryMongo.DISCUSSION_TYPE}
@@ -29,16 +31,14 @@ class CommentRepositoryMongo(CommentRepository):
 
     async def get(self, topic_id: str, comment_id: str) -> Optional[Comment]:
         """Get a comment."""
-        if (
-            comment := await self.mongodb.find_one(
-                {
-                    "_id": comment_id,
-                    "topic": topic_id,
-                    "type": CommentRepositoryMongo.DISCUSSION_TYPE,
-                }
-            )
-        ) is not None:
-            return comment
+        comment = await self.mongodb.find_one(
+            {
+                "_id": comment_id,
+                "topic": topic_id,
+                "type": CommentRepositoryMongo.DISCUSSION_TYPE,
+            }
+        )
+        return comment
 
     async def create(self, comment: Dict[str, Any]) -> str:
         """Create a comment."""
@@ -56,5 +56,7 @@ class CommentRepositoryMongo(CommentRepository):
 
     async def delete(self, topic_id: str, comment_id: str) -> int:
         """Delete a comment."""
-        result = await self.mongodb.delete_one({"_id": comment_id, "topic": topic_id})
+        result = await self.mongodb.delete_one(
+            {"_id": comment_id, "topic": topic_id}
+        )
         return result.deleted_count

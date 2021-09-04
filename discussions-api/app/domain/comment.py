@@ -1,8 +1,8 @@
-"""Comment module."""
+"""Comment domain module."""
 
-from typing import Optional
 import uuid
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -42,8 +42,4 @@ class UpdateComment(BaseModel):
         """Pydantic config class."""
 
         allow_population_by_field_name = True
-        schema_extra = {
-            "example": {
-                "content": "Sure! I can help you!",
-            }
-        }
+        schema_extra = {"example": {"content": "Sure! I can help you!"}}

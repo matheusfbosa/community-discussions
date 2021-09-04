@@ -5,6 +5,11 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 .pytest_cache/
+.mypy_cache/
 
 # Ignore dynaconf secret files
 .secrets.*
+
+# Tests
+.coverage
+htmlcov/

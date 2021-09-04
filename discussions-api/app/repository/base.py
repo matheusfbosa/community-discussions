@@ -1,10 +1,10 @@
-"""Repository module."""
+"""Base repository module."""
 
 import abc
 from typing import Any, Dict, List, Optional
 
-from discussion.domain.comment import Comment
-from discussion.domain.topic import Topic
+from app.domain.comment import Comment
+from app.domain.topic import Topic
 
 
 class TopicRepository:
@@ -35,7 +35,7 @@ class TopicRepository:
         raise NotImplementedError()
 
     @abc.abstractmethod
-    async def update(self, topic_id: str, topic: Dict[str, Any]) -> Optional[Topic]:
+    async def update(self, topic_id: str, topic: Dict[str, Any]) -> int:
         """Update a topic."""
         raise NotImplementedError()
 

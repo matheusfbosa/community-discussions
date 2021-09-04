@@ -1,11 +1,11 @@
-"""Repository module."""
+"""Topic repository module."""
 
 from typing import Any, Dict, List, Optional
 
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
+from motor.motor_asyncio import AsyncIOMotorClient
 
-from discussion.domain.topic import Topic
-from discussion.repository.base import TopicRepository
+from app.domain.topic import Topic
+from app.repository.base import TopicRepository
 
 
 class TopicRepositoryMongo(TopicRepository):
@@ -18,7 +18,9 @@ class TopicRepositoryMongo(TopicRepository):
 
     async def find(self, skip: int, limit: int) -> List[Topic]:
         """Find topics."""
-        cursor = self.mongodb.find({"type": TopicRepositoryMongo.DISCUSSION_TYPE})
+        cursor = self.mongodb.find(
+            {"type": TopicRepositoryMongo.DISCUSSION_TYPE}
+        )
         cursor.skip(skip).limit(limit)
         topics: List[Topic] = []
         async for doc in cursor:
@@ -37,8 +39,7 @@ class TopicRepositoryMongo(TopicRepository):
         if term:
             query.append({"$text": {"$search": term}})
             cursor = self.mongodb.find(
-                {"$and": query},
-                {"score": {"$meta": "textScore"}},
+                {"$and": query}, {"score": {"$meta": "textScore"}},
             )
             # Sorting results in ascending order by text score
             cursor.sort([("score", {"$meta": "textScore"})])
@@ -53,12 +54,10 @@ class TopicRepositoryMongo(TopicRepository):
 
     async def get(self, topic_id: str) -> Optional[Topic]:
         """Get a topic."""
-        if (
-            topic := await self.mongodb.find_one(
-                {"_id": topic_id, "type": TopicRepositoryMongo.DISCUSSION_TYPE}
-            )
-        ) is not None:
-            return topic
+        topic = await self.mongodb.find_one(
+            {"_id": topic_id, "type": TopicRepositoryMongo.DISCUSSION_TYPE}
+        )
+        return topic
 
     async def create(self, topic: Dict[str, Any]) -> str:
         """Create a topic."""
@@ -67,7 +66,9 @@ class TopicRepositoryMongo(TopicRepository):
 
     async def update(self, topic_id: str, topic: Dict[str, Any]) -> int:
         """Update a topic."""
-        result = await self.mongodb.update_one({"_id": topic_id}, {"$set": topic})
+        result = await self.mongodb.update_one(
+            {"_id": topic_id}, {"$set": topic}
+        )
         return result.modified_count
 
     async def delete(self, topic_id: str) -> int:
